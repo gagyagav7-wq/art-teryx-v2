@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ART'TERYX</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --primary: #8a0303; --accent: #ff0000; --text: #e0e0e0; --bg-card: #0f0f0f; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            background-color: #000;
+            background-image: radial-gradient(circle at center, #150000 0%, #000 100%);
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .container { max-width: 100%; margin: 0 auto; padding-bottom: 120px; }
+
+        header { width: 100%; margin: 0; padding: 0; line-height: 0; background: #000; }
+        .brand-logo { width: 100%; height: auto; display: block; object-fit: cover; filter: none; }
+
+        /* TERMINAL DOWNLOADER STYLE */
+        .downloader-box {
+            margin: 20px;
+            padding: 15px;
+            background: rgba(10, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-top: 2px solid var(--primary);
+            display: none; /* Hidden by default */
+        }
+        .downloader-box input {
+            width: 100%;
+            background: #000;
+            border: 1px solid #222;
+            padding: 12px;
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            outline: none;
+        }
+        .downloader-box button {
+            width: 100%;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            font-family: 'Metal Mania';
+            font-size: 1.2rem;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        .downloader-box button:disabled { background: #333; color: #666; }
+
+        /* DOWNLOADER LINK PANEL */
+        .dl-link-box {
+            margin: 0 20px 20px 20px;
+            padding: 15px;
+            background: rgba(10, 0, 0, 0.6);
+            border: 1px solid #333;
+            border-left: 3px solid var(--primary);
+            display: none;
+        }
+        .dl-link-title {
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #bbb;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+        .dl-link-box input {
+            width: 100%;
+            background: #000;
+            border: 1px solid #222;
+            padding: 12px;
+            color: var(--accent);
+            font-family: monospace;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .dl-link-box button {
+            width: 100%;
+            margin-top: 10px;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            font-family: 'Metal Mania';
+            font-size: 1.05rem;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: 0.2s;
+        }
+        .dl-link-box button:hover { border-color: var(--primary); }
+
+        .breadcrumbs {
+            margin: 20px;
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            background: rgba(10, 10, 10, 0.9);
+            padding: 15px;
+            border: 1px solid #333;
+            border-left: 3px solid var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+        .breadcrumbs a { color: #888; text-decoration: none; transition: 0.3s; }
+        .breadcrumbs a:hover { color: var(--accent); }
+        .separator { margin: 0 10px; color: #444; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; padding: 0 20px; }
+        .item-card {
+            background: linear-gradient(180deg, #151515 0%, #0a0a0a 100%);
+            border: 1px solid #222;
+            padding: 25px 10px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            display: block;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .item-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .item-icon {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            transition: 0.3s;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8));
+        }
+        .item-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bbb;
+            margin-top: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+        .item-meta { font-size: 0.6rem; color: #444; margin-top: 6px; font-family: monospace; }
+
+        /* Video thumb */
+        .video-thumb-container {
+            width: 100%;
+            height: 120px;
+            background: #000;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+        .video-thumb-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .item-card:hover .video-thumb-container video {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .duration-tag {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .fab-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 15px;
+            z-index: 50;
+        }
+        .fab-main {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: #000;
+            transform: rotate(45deg);
+            border: 2px solid #fff;
+            box-shadow: 0 0 20px rgba(138, 3, 3, 0.6);
+            font-size: 1.6rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fab-main i { transform: rotate(-45deg); }
+        .fab-main.active { background: #000; color: #fff; border-color: var(--accent); }
+        .fab-action {
+            width: 45px;
+            height: 45px;
+            background: #111;
+            border: 1px solid #333;
+            transform: rotate(45deg);
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+        .fab-container.open .fab-action { opacity: 1; pointer-events: auto; }
+
+        .input-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 99;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .input-box {
+            background: #050505;
+            border: 1px solid var(--primary);
+            padding: 30px;
+            width: 85%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(138, 3, 3, 0.2);
+        }
+        .input-box h3 { font-family: 'Metal Mania'; color: var(--accent); font-size: 1.8rem; margin-bottom: 20px; letter-spacing: 2px; }
+        .input-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 25px;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            text-align: center;
+            font-family: 'Rajdhani';
+            font-weight: bold;
+            font-size: 1.1rem;
+            outline: none;
+            text-transform: uppercase;
+        }
+        .modal-btn { padding: 10px 25px; background: transparent; border: 1px solid #444; color: #fff; font-weight: bold; cursor: pointer; }
+        .btn-confirm { border-color: var(--primary); color: var(--accent); }
+
+        .delete-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(20, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.2s;
+            color: var(--accent);
+            font-size: 2rem;
+            border: 2px solid var(--accent);
+            z-index: 5;
+        }
+        body.delete-mode .item-card { animation: shake 0.3s infinite alternate; cursor: pointer; border-color: #500; }
+        body.delete-mode .delete-overlay { opacity: 1; pointer-events: auto; }
+        @keyframes shake { from { transform: translate(1px, 1px) rotate(0deg); } to { transform: translate(-1px, -2px) rotate(-1deg); } }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <img src="{{ url_for('static', filename='images/logo-metal.png') }}" alt="ART'TERYX" class="brand-logo"
+                 onerror="this.style.display='none'; document.getElementById('alt-logo').style.display='block';">
+            <h1 id="alt-logo" style="display:none; text-align:center; padding:50px; font-family:'Metal Mania'; color:#8a0303;">ART'TERYX</h1>
+        </header>
+
+        <!-- Downloader Box (muncul di album level) -->
+        <div id="dynamic-downloader" class="downloader-box">
+            <input type="text" id="input-url" placeholder=">> PASTE URL HERE..." autocomplete="off">
+            <button onclick="executeSystemDownload()" id="btn-exec">EXECUTE SYSTEM DOWNLOAD</button>
+        </div>
+
+        <div id="jobHud" style="display:none; margin-top:12px;">
+          <div id="jobText" style="font-family:monospace; color:#ff0000; letter-spacing:1px; font-size:0.85rem;">
+            >> PROCESSING 0%
+          </div>
+          <div style="margin-top:8px; height:10px; background:#0a0a0a; border:1px solid #222; position:relative; overflow:hidden;">
+            <div id="jobBar" style="height:100%; width:0%; background:#8a0303; box-shadow: 0 0 10px rgba(255,0,0,0.25);"></div>
+          </div>
+          <div id="jobSub" style="margin-top:6px; font-family:monospace; color:#666; font-size:0.75rem;">
+            SYSTEM: IDLE
+          </div>
+        </div>
+
+        <div class="breadcrumbs">
+            <a href="/"><i class="fas fa-skull"></i> ROOT</a>
+            {% for crumb in breadcrumbs %}
+                <span class="separator">/</span>
+                <a href="/?path={{ crumb.path }}">{{ crumb.name }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- Downloader Link Panel (hanya album) -->
+        {% if is_album %}
+        <div id="dlLinkPanel" class="dl-link-box">
+            <div class="dl-link-title">🔗 DOWNLOADER LINK (ALBUM)</div>
+            <input id="dlLink" value="{{ downloader_link }}" readonly>
+            <button onclick="copyDownloaderLink()">COPY LINK</button>
+        </div>
+        {% endif %}
+
+        <main class="grid">
+            {% for item in items %}
+                <div class="item-wrapper" style="position: relative;">
+                    <a href="{{ '/?path=' + item.path if item.type == 'folder' else 'https://t.me/' + bot_username + '?start=view_' + (item.path | urlencode) }}"
+                       class="item-card">
+
+                        {% if item.type == 'folder' %}
+                            <div class="item-icon"><i class="fas fa-folder"></i></div>
+                        {% else %}
+                            <div class="video-thumb-container" style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                                <div class="item-icon" style="margin:0;">
+                                    <i class="fas fa-cloud"></i>
+                                </div>
+                                <div class="duration-tag">CLOUD</div>
+                            </div>
+                        {% endif %}
+
+                        <div class="item-name">{{ item.name }}</div>
+                        <div class="item-meta">{{ item.meta }}</div>
+                    </a>
+
+                    <div class="delete-overlay" onclick="confirmDelete('{{ item.path }}', '{{ item.name }}')">
+                        <i class="fas fa-trash-alt"></i>
+                    </div>
+                </div>
+            {% endfor %}
+        </main>
+    </div>
+
+    <!-- FAB -->
+    <div class="fab-container" id="fabMenu">
+        <button class="fab-action" onclick="showInputModal()"><i class="fas fa-plus"></i></button>
+        <button class="fab-action" id="deleteBtn" onclick="toggleDeleteMode()"><i class="fas fa-trash-alt"></i></button>
+        <button class="fab-main" onclick="toggleFab()"><i class="fas fa-plus"></i></button>
+    </div>
+
+    <!-- Modal create folder -->
+    <div class="input-overlay" id="inputModal">
+        <div class="input-box">
+            <h3>NEW DIRECTORY</h3>
+            <input type="text" id="folderName" placeholder="ENTER NAME..." autocomplete="off">
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <button class="modal-btn" onclick="closeInputModal()">CANCEL</button>
+                <button class="modal-btn btn-confirm" onclick="submitFolder()">CREATE</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const currentPath = "{{ current_path }}";
+    const fabMenu = document.getElementById('fabMenu');
+    const mainFab = document.querySelector('.fab-main');
+
+    const downloaderBox = document.getElementById('dynamic-downloader');
+    const urlInput = document.getElementById('input-url');
+
+    const segments = currentPath.split('/').filter(s => s !== "");
+
+    // ===== SMART RULE: Downloader cuma muncul di album level =====
+    const isDownloaderAlbum =
+      (segments.length >= 4 &&
+       (segments[0] || "").toUpperCase() === "DOWNLOADER" &&
+       (segments[1] || "").toUpperCase() === "PLATFORM");
+
+    if (isDownloaderAlbum) {
+      downloaderBox.style.display = 'block';
+      fabMenu.style.display = 'none';
+
+        const platformName = (segments[2] || "").toUpperCase();
+        const albumName = (segments[3] || "").replace(/-/g, ' ').toUpperCase();
+        urlInput.placeholder = `>> PASTE ${platformName} LINK FOR [${albumName}]...`;
+
+        // tampilkan panel copy link (kalau ada)
+        const dlPanel = document.getElementById('dlLinkPanel');
+        if (dlPanel) dlPanel.style.display = "block";
+    } else {
+      downloaderBox.style.display = 'none';
+      fabMenu.style.display = 'flex';
+    }
+
+    // ===== dl=1 => auto focus + scroll =====
+    const params = new URLSearchParams(window.location.search);
+    const forceDl = params.get("dl") === "1";
+    if (forceDl && isDownloaderAlbum) {
+        setTimeout(() => {
+            downloaderBox.style.display = 'block';
+            urlInput.focus();
+            downloaderBox.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 200);
+    }
+
+    function copyDownloaderLink() {
+        const el = document.getElementById("dlLink");
+        if (!el) return;
+
+        el.select();
+        el.setSelectionRange(0, 99999);
+
+        // clipboard modern
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(el.value);
+        } else {
+            document.execCommand("copy");
+        }
+
+        tg?.HapticFeedback?.notificationOccurred('success');
+        alert("✅ LINK COPIED");
+    }
+
+    function toggleFab() {
+        fabMenu.classList.toggle('open');
+        mainFab.classList.toggle('active');
+    }
+
+    function showInputModal() {
+        document.getElementById('inputModal').style.display = 'flex';
+        document.getElementById('folderName').focus();
+        toggleFab();
+    }
+
+    function closeInputModal() {
+        document.getElementById('inputModal').style.display = 'none';
+    }
+
+    async function submitFolder() {
+        const name = document.getElementById('folderName').value.trim();
+        if (!name) return;
+
+        await fetch('/create_folder', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ path: currentPath, name })
+        });
+
+        location.reload();
+    }
+
+    function toggleDeleteMode() {
+        document.body.classList.toggle('delete-mode');
+        document.getElementById('deleteBtn').classList.toggle('active');
+        toggleFab();
+    }
+
+    async function confirmDelete(path, name) {
+        if (confirm(`Delete '${name}'?`)) {
+            await fetch('/delete_item', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ path })
+            });
+            location.reload();
+        }
+    }
+
+    async function pollJob(jobId, btn, originalText) {
+      const hud = document.getElementById("jobHud");
+      const jobText = document.getElementById("jobText");
+      const jobBar = document.getElementById("jobBar");
+      const jobSub = document.getElementById("jobSub");
+
+      if (hud) hud.style.display = "block";
+
+      while (true) {
+        const r = await fetch(`/api/status/${jobId}`);
+        const j = await r.json();
+
+        if (!j.success) {
+          btn.innerText = originalText;
+          btn.disabled = false;
+          if (jobSub) jobSub.innerText = "SYSTEM: ERROR";
+          alert("❌ JOB ERROR: " + (j.error || "UNKNOWN"));
+          return;
+        }
+
+        const st = (j.status || "queued").toUpperCase();
+        const pct = (typeof j.progress === "number") ? j.progress : 0;
+        const spd = j.speed ? ` | SPEED ${j.speed}` : "";
+
+        if (st === "PROCESSING") btn.innerText = `>> PROCESSING ${pct}%`;
+        else btn.innerText = `>> ${st}...`;
+
+        if (jobText) jobText.innerText = `>> ${st}${st === "PROCESSING" ? " " + pct + "%" : ""}`;
+        if (jobBar) jobBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+        if (jobSub) jobSub.innerText = `SYSTEM: ${st}${spd}`;
+
+        if (j.status === "done") {
+          tg?.HapticFeedback?.notificationOccurred('success');
+          if (jobBar) jobBar.style.width = "100%";
+          if (jobText) jobText.innerText = ">> DONE 100%";
+          if (jobSub) jobSub.innerText = "SYSTEM: FILE SECURED";
+          alert("🔥 DATA SECURED: FILE SYNCHRONIZED");
+          urlInput.value = "";
+          location.reload();
+          return;
+        }
+
+        if (j.status === "error") {
+          tg?.HapticFeedback?.notificationOccurred('error');
+          btn.innerText = originalText;
+          btn.disabled = false;
+          if (jobSub) jobSub.innerText = "SYSTEM: ERROR";
+          alert("❌ BREACH FAILED: " + (j.error || "UNKNOWN"));
+          return;
+        }
+
+        await new Promise(res => setTimeout(res, 1000));
+      }
+    }
+
+    async function executeSystemDownload() {
+        const url = urlInput.value.trim();
+        const userName = tg.initDataUnsafe?.user?.first_name || "Owner";
+
+        if (!url.startsWith('http')) {
+            tg.showAlert("SYSTEM ERROR: INVALID PROTOCOL.");
+            return;
+        }
+
+        const btn = document.getElementById('btn-exec');
+        const originalText = btn.innerText;
+        btn.innerText = ">> QUEUING JOB...";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/api/download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, user: userName, folder: currentPath })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                await pollJob(data.job_id, btn, originalText);
+            } else {
+                tg?.HapticFeedback?.notificationOccurred('error');
+                alert("❌ BREACH FAILED: " + data.error);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            alert("❌ CRITICAL ERROR: SERVER OFFLINE");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+venv/
+.env  <-- WAJIB ADA INI
+cookies.txt
+cookies_instagram.txt
+cookies_x.txt

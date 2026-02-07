@@ -1,0 +1,17 @@
+# Core
+flask
+flask-cors
+python-dotenv
+
+# Telegram (Async)
+pyrogram
+tgcrypto
+
+# HTTP/Async
+aiohttp
+aiofiles
+requests
+
+# Media Processing
+yt-dlp
+ffmpeg-python
