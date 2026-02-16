@@ -1,4 +1,4 @@
-# 🎯 ART'TERYX - God-Tier Media Downloader
+# 👁️ HIERARCHY - God-Tier Media Downloader
 
 > **Aria2-class Telegram Media Archiver with Zero-Disk Streaming**
 
